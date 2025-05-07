@@ -13,14 +13,12 @@
 
 - Nombre del grupo
 
-- Legajo: **Completar**
-- Nombre: **Completar**
+- Legajo: 222.251-6
+- Nombre: Lucas Felipe Crespo 
 
-- Legajo: **Completar**
-- Nombre: **Completar**
+- Legajo: 220601-8
+- Nombre: Chuan Te Liu
 
-- Legajo: **Completar**
-- Nombre: **Completar**
 
 
 ## El enunciado
