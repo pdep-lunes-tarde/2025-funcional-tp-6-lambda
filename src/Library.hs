@@ -2,7 +2,6 @@ module Library where
 
 import PdePreludat
 
-
 data Ingrediente
   = Carne
   | Pan
@@ -12,6 +11,9 @@ data Ingrediente
   | Curry
   | QuesoDeAlmendras
   | Papas
+  | PatiVegano
+  | BaconDeTofu
+  | PanIntegral
   deriving (Eq, Show)
 
 precioIngrediente :: Ingrediente -> Number
@@ -23,6 +25,8 @@ precioIngrediente Pollo = 10
 precioIngrediente Curry = 5
 precioIngrediente QuesoDeAlmendras = 15
 precioIngrediente Papas = 10
+precioIngrediente PatiVegano = 10
+precioIngrediente PanIntegral = 3
 
 data Hamburguesa = Hamburguesa
   { precioBase :: Number,
@@ -40,8 +44,10 @@ cuartoDeLibra = Hamburguesa {precioBase = 20, ingredientes = [Pan, Carne, Chedda
 
 agrandar :: Hamburguesa -> Hamburguesa
 agrandar hamburguesa
+  | (elem PatiVegano . ingredientes) hamburguesa = hamburguesa {ingredientes = PatiVegano : ingredientes hamburguesa}
   | (elem Carne . ingredientes) hamburguesa = hamburguesa {ingredientes = Carne : ingredientes hamburguesa}
   | (elem Pollo . ingredientes) hamburguesa = hamburguesa {ingredientes = Pollo : ingredientes hamburguesa}
+  | otherwise = hamburguesa
 
 agregarIngrediente :: Ingrediente -> Hamburguesa -> Hamburguesa
 agregarIngrediente ingrediente hamburguesa = hamburguesa {ingredientes = ingrediente : ingredientes hamburguesa}
@@ -55,15 +61,49 @@ descuento descuentos hamburguesa = hamburguesa {precioBase = calcularDescuento d
 calcularPrecio :: Hamburguesa -> Number
 calcularPrecio hamburguesa = precioBase hamburguesa + precioIngredientes hamburguesa
 
-pdepBurger :: Number
+pdepBurger :: Hamburguesa
 pdepBurger = descuento 20 . agregarIngrediente Cheddar . agregarIngrediente Panceta . agrandar . agrandar $ cuartoDeLibra
--- pdepBurger = descuento 20 . calcularPrecio $ Hamburguesa{precioBase= precioBase cuartoDeLibra, ingredientes= agregarIngrediente Panceta . agrandar . agrandar $ ingredientes cuartoDeLibra}
+
+precioPdeP :: Number
+precioPdeP = calcularPrecio pdepBurger
+
 -- Parte II
+
 dobleCuarto :: Hamburguesa
-dobleCuarto = agregarIngrediente Carne . agregarIngrediente Cheddar $ Hamburguesa {precioBase = 34, ingredientes = [Pan, Carne, Cheddar, Pan]}
+dobleCuarto = agregarIngrediente Carne . agregarIngrediente Cheddar $ cuartoDeLibra
+
+precioDobleCuarto :: Number
+precioDobleCuarto = calcularPrecio dobleCuarto
 
 bigPdep :: Hamburguesa
 bigPdep = agregarIngrediente Curry dobleCuarto
 
+precioBigPdep :: Number
+precioBigPdep = calcularPrecio bigPdep
+
 delDia :: Hamburguesa -> Hamburguesa
-delDia = descuento 30 . agregarIngrediente Papas
+delDia hamburguesa = descuento 30 . agregarIngrediente Papas $ hamburguesa
+
+precioDeldia :: Hamburguesa -> Number
+precioDeldia hamburguesa = calcularPrecio (delDia hamburguesa)
+
+-- Parte III
+reemplazarVeg :: Ingrediente -> Ingrediente
+reemplazarVeg Carne = PatiVegano
+reemplazarVeg Pollo = PatiVegano
+reemplazarVeg Cheddar = QuesoDeAlmendras
+reemplazarVeg Panceta = BaconDeTofu
+reemplazarVeg otro = otro
+
+hacerVeggie :: Hamburguesa -> Hamburguesa
+hacerVeggie hamburguesa = hamburguesa {ingredientes = map reemplazarVeg (ingredientes hamburguesa)}
+
+reemplazarPanIntegral :: Ingrediente -> Ingrediente
+reemplazarPanIntegral Pan = PanIntegral
+reemplazarPanIntegral otro = otro
+
+reemplazoPan :: Hamburguesa -> Hamburguesa
+reemplazoPan hamburguesa = hamburguesa {ingredientes = map reemplazarPanIntegral (ingredientes hamburguesa)}
+
+dobleCuartoVegano :: Hamburguesa -> Hamburguesa
+dobleCuartoVegano = reemplazoPan . hacerVeggie
